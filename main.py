@@ -22,6 +22,7 @@ def init():
 origins = [
     'http://localhost',
     'http://localhost:3000',
+    'https://modelshowroom-frontend.vercel.app',
     public_host
 ]
 

@@ -21,6 +21,7 @@ def init():
      
 origins = [
     'http://localhost',
+    'http://localhost:3000',
     public_host
 ]
 

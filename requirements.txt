@@ -1,0 +1,6 @@
+fastapi==0.115.0
+requests==2.32.3
+uvicorn==0.30.6
+urllib3==1.26.6
+PyYAML==6.0.2
+google-cloud-vision==3.7.4

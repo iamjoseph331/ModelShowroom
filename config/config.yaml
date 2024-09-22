@@ -1,0 +1,45 @@
+host: 0.0.0.0
+port: 6370
+
+# List of tasks
+task:
+  face_attributes:
+    class: core.attributes.FaceAttrbutesHandler
+    models: 
+      - GoogleCloud: infra.api.google_detect.detect_faces
+  face_detection:
+    class: core.detection.FaceDetectionHandler
+    models: 
+       - GoogleCloud: infra.api.google_detect.detect_faces
+
+
+       
+logging:
+  version: 1
+  objects:
+    queue:
+      class: queue.Queue
+      maxsize: -1
+  formatters:
+    simple:
+      format: '{"level":"%(levelname)s","time":"%(asctime)s","caller":"%(pathname)s:%(lineno)d","message":"%(message)s"}'
+      datefmt: '%Y-%m-%dT%H:%M:%S%Z'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: DEBUG  # need to change level when for production
+      formatter: simple
+      stream: ext://sys.stdout
+    file:
+      class: logging.FileHandler
+      filename: 'server.log'
+      formatter: simple
+    queue_listener:
+      class: josephlogging.listener.QueueListenerHandler
+      queue: cfg://objects.queue
+      handlers:
+        - cfg://handlers.file
+  root:
+    level: INFO  # need to change level when for production
+    handlers:
+      - console

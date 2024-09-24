@@ -6,4 +6,4 @@ PyYAML==6.0.2
 google-cloud-vision==3.7.4
 onnxruntime==1.19.2
 opencv-python-headless==4.10.0.84
-torch==2.2.2
+torch==2.2.2+cpu

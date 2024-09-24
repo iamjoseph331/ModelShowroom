@@ -2,11 +2,13 @@ from fastapi import Depends
 from config.config import cfg
 from domain.interface import Image, Error
 from core.attributes import FaceAttrbutesHandler
+from core.detection import FaceDetectionHandler
 
 class ModelView:
     tasks = {}
-    def __init__(self, fa=Depends(FaceAttrbutesHandler)):    
+    def __init__(self, fd=Depends(FaceDetectionHandler), fa=Depends(FaceAttrbutesHandler)):    
         self.tasks['face_attributes'] = fa
+        self.tasks['face_detection'] = fd
 
     def predict(self, image: Image):
         if image.cv_task not in self.tasks:

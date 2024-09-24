@@ -51,7 +51,7 @@ class PriorBox:
 
         anchors = np.array(anchors).reshape(-1, 4)
         if self.clip:
-            anchors = clamp(anchors, min_value=0.0, max_value=1.0)
+            anchors = np.clip(anchors, a_min=0.0, a_max=1.0)
         return anchors
 
 def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True):

@@ -13,8 +13,6 @@ task:
     models: 
        - GoogleCloud: infra.api.google_detect.detect_faces
        - Joseph: infra.api.internalmodels.face_detect.predict
-
-
        
 logging:
   version: 1

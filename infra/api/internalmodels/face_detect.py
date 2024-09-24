@@ -1,7 +1,6 @@
 import os
 import cv2
 import time
-import torch
 import base64
 import numpy as np
 import onnxruntime as ort
@@ -10,7 +9,7 @@ from infra.common.utils import data_uri_to_cv2_img
 from domain.interface import result, point, Error
 import josephlogging.log as log
 
-DEBUG = False
+DEBUG = True
 logger = log.getLogger(__name__)
 providers =  ['CPUExecutionProvider']
 ort_session = None
@@ -78,33 +77,44 @@ def inference(img_raw, vis_thres=0.6):
     outlog['speed'] = ('took {}'.format(time.time() - t0))
     
     cfg = cfg_blaze
-    prior_data = priors.data
-    boxes = decode(torch.tensor(loc.squeeze()), prior_data, cfg['variance'])
-    landms = decode_landm(torch.tensor(landmk.squeeze()), prior_data, cfg['variance'], num_landmarks=106)
+    prior_data = priors
+    boxes = decode(loc.squeeze(), prior_data, cfg['variance'])
+    landms = decode_landm(landmk.squeeze(), prior_data, cfg['variance'], num_landmarks=106)
+
+    # Apply softmax to the 'conf' array along axis=2
     conf = softmax(conf, axis=2)
+
+    # Extract scores for the second class (index 1)
     scores = conf.squeeze()[:, 1]
-    # ignore low scores
+
+    # Ignore low scores based on the threshold
     inds = np.where(scores > nms_thresh)[0]
     boxes = boxes[inds]
     landms = landms[inds]
     scores = scores[inds]
-    
-    img = np.float32(img_raw)#[height, width, 3]
-    img = img.transpose(2, 0, 1)#[3, height, width]
-    img = torch.from_numpy(img).unsqueeze(0)#[1, 3, height, width]
 
-    r = max(img.shape[2],img.shape[3])
-    off_y = (r - img.shape[2])//2
-    off_x = (r - img.shape[3])//2
-    #resize back
-    scale = torch.Tensor([r]*4)
-    boxes = boxes * scale - torch.Tensor([off_x, off_y] * 2) # (height, width)
-    boxes = boxes.cpu().numpy()
+    # Process the image
+    img = np.float32(img_raw)  # [height, width, 3]
+    img = img.transpose(2, 0, 1)  # [3, height, width]
+    img = np.expand_dims(img, axis=0)  # [1, 3, height, width]
 
-    scale = torch.Tensor([r]*212)
+    # Determine the size for resizing
+    r = max(img.shape[2], img.shape[3])
+    off_y = (r - img.shape[2]) // 2
+    off_x = (r - img.shape[3]) // 2
 
-    landms = landms * scale - torch.Tensor([off_x, off_y] * 106) # (x, y)
-    landms = landms.cpu().numpy()
+    # Resize back using scaling
+    scale = np.array([r] * 4)
+    boxes = boxes * scale - np.array([off_x, off_y] * 2)  # (height, width)
+
+    # Since we're using NumPy, no need to convert to CPU or back to NumPy
+    # boxes are already NumPy arrays
+    # If needed, ensure they are in the desired data type
+    boxes = boxes.astype(np.float32)
+
+    scale_landm = np.array([r] * 212)
+    landms = landms * scale_landm - np.array([off_x, off_y] * 106)  # (x, y)
+    landms = landms.astype(np.float32)
 
     # keep top-K before NMS
     order = scores.argsort()[::-1][:5000]#args.topk = 5000
@@ -169,5 +179,5 @@ if __name__ == '__main__':
     bb = predict(encode).bounding_box[0]
     print(bb[0].to_str(), bb[1].to_str())
     print(f'average took: {(time.time() - st)} s')
-    # img = cv2.rectangle(cv2.imread("test_img/0.jpg"), (bb[0].x, bb[0].y), (bb[1].x, bb[1].y), (0, 0, 255), 2)
+    # img = cv2.rectangle(cv2.imread("/Users/macbook/Code/MVP/JosephPlatform/test_img/0.jpg"), (bb[0].x, bb[0].y), (bb[1].x, bb[1].y), (0, 0, 255), 2)
     # cv2.imwrite('output.jpg', img)

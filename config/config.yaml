@@ -7,10 +7,12 @@ task:
     class: core.attributes.FaceAttrbutesHandler
     models: 
       - GoogleCloud: infra.api.google_detect.detect_faces
+      - Joseph: infra.api.internalmodels.face_attr.predict
   face_detection:
     class: core.detection.FaceDetectionHandler
     models: 
        - GoogleCloud: infra.api.google_detect.detect_faces
+       - Joseph: infra.api.internalmodels.face_detect.predict
 
 
        

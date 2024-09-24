@@ -4,3 +4,4 @@ uvicorn==0.30.6
 urllib3==1.26.6
 PyYAML==6.0.2
 google-cloud-vision==3.7.4
+onnxruntime==1.19.2

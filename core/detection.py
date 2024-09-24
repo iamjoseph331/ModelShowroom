@@ -25,9 +25,9 @@ class FaceDetectionHandler:
         self.logger.info(f'FD models: {[m for m in self.model_list]}')
 
     def predict(self, image: Image):
-        model_name = image.model_name
+        model_name = image.mdl_name
         if model_name not in self.model_list:
-            return Error(where='model_name', what='not found').json()
+            return Error(where='mdl_name', what='not found').json()
         res = self.model_list[model_name](image.image)
         return res
 

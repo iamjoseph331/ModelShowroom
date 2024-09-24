@@ -9,7 +9,7 @@ from infra.common.utils import data_uri_to_cv2_img
 from domain.interface import result, point, Error
 import josephlogging.log as log
 
-DEBUG = True
+DEBUG = False
 logger = log.getLogger(__name__)
 providers =  ['CPUExecutionProvider']
 ort_session = None
@@ -54,7 +54,7 @@ def loosedetectxyxy(img, fx):
     return new_det
 
 def inference(img_raw, vis_thres=0.6):
-    st0 = time.time()
+    print('inference started')
     outlog = {}
     img_size = 256
     nms_thresh = 0.6
@@ -169,6 +169,7 @@ def inference(img_raw, vis_thres=0.6):
     if DEBUG:
         cv2.imwrite('output.jpg', img_raw)
     outlog['outcome'] = txt
+    print(outlog)
     res = result(name='face_detect', bb=bbs, lms=lmks, scores=scores, imgtxt=txt, outstr=outlog)
     return res
 

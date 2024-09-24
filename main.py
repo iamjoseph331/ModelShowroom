@@ -1,6 +1,7 @@
 import uvicorn
 
 from core.attributes import FaceAttrbutesHandler
+from core.detection import FaceDetectionHandler
 
 from view.view import ModelView
 from config.config import cfg, public_host
@@ -17,7 +18,8 @@ logger = log.getLogger(__name__)
 
 def init():
     fa_handle = FaceAttrbutesHandler()
-    return ModelView(fa=fa_handle)
+    fd_handle = FaceDetectionHandler()
+    return ModelView(fd=fd_handle, fa=fa_handle)
      
 origins = [
     'http://localhost',
@@ -50,5 +52,6 @@ async def get_models():
     return view.get_models()
 
 if __name__ == '__main__':
-    print('Starting server...')
-    uvicorn.run('main:app', host=cfg['host'], port=cfg['port'], log_level='info', workers=4)
+    port = cfg['port']
+    print(f'Starting server at port {port}...')
+    uvicorn.run('main:app', host=cfg['host'], port=port, log_level='info', workers=4)

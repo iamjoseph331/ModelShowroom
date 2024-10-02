@@ -3,54 +3,24 @@ import base64
 from google.cloud import vision
 import josephlogging.log as log
 from domain.interface import result, point, Error
+from domain.utils import trim_base64_header
 
-'''
-def face_attributes(image: str):
-    bounding_boxes = []
-    image_text = []
-    res = sendRequest(image, pos=True, att=True)
-    out_str = 'N/A'
-    try:
-        entities = res.json()['entities']
-        for e in entities:
-            bb = e['details']['position']
-            p1 = point(bb['left'],bb['top'])
-            p2 = point(bb['left'] + bb['width'], bb['top'] + bb['height'])
-            bounding_boxes.append((p1, p2))
-            out_str = e['details']['attributes']
-            age = out_str['age']['value']
-            gender = out_str['gender']['value']
-            mask = out_str['mask']['value']
-
-            emotions = out_str['emotions']
-            max_emotion = emotions[0]
-            for e in emotions:
-                if e['certainty'] > max_emotion['certainty']:
-                    max_emotion = e
-            emotion = max_emotion['value']
-
-            image_text.append(f'Age: {age}, Gender: {gender}, emotion: {emotion}, {mask}')
-        out_str['Endpoint'] = cfg['endpoints']['anysee_detect']['url'] 
-    except Exception as e:
-        out_str = res.json()
-        logger.error(f'Face Attributes Error!{e}')
-    
-    return result(name='Anysee', bb=bounding_boxes, imgtxt=image_text, outstr=out_str)
-'''
+logger = log.getLogger(__name__)
 
 def detect_faces(image: str):
     """Detects faces in an image."""
-    return result(name='Google', bb=[], imgtxt='text', outstr='outstr')
     client = vision.ImageAnnotatorClient()
-
-    with open(path, "rb") as image_file:
-        content = image_file.read()
-
+    image, _ = trim_base64_header(logger, image)
+    content = base64.b64decode(image)
+    print(image[:20])
     image = vision.Image(content=content)
 
     response = client.face_detection(image=image)
     faces = response.face_annotations
-
+    if response.error.message:
+        logger.error(response.error.message)
+        return Error(what="google vision error", where="detect")
+    
     # Names of likelihood from google.cloud.vision.enums
     likelihood_name = (
         "UNKNOWN",
@@ -60,27 +30,38 @@ def detect_faces(image: str):
         "LIKELY",
         "VERY_LIKELY",
     )
-    print("Faces:")
-
+    print(f"Faces: {len(faces)}")
+    bounding_boxes = []
+    confs = []
+    landmarks = []
+    orientations = []
+    headwear_likelihoods = []
     for face in faces:
-        print(f"anger: {likelihood_name[face.anger_likelihood]}")
-        print(f"joy: {likelihood_name[face.joy_likelihood]}")
-        print(f"surprise: {likelihood_name[face.surprise_likelihood]}")
+        print(f"headwear_likelihood: {likelihood_name[face.headwear_likelihood]}")
+        print(f"detection_confidence: {face.detection_confidence}")
 
         vertices = [
             f"({vertex.x},{vertex.y})" for vertex in face.bounding_poly.vertices
         ]
 
         print("face bounds: {}".format(",".join(vertices)))
+        bounding_boxes.append((point(face.bounding_poly.vertices[0].x, face.bounding_poly.vertices[0].y), point(face.bounding_poly.vertices[2].x, face.bounding_poly.vertices[2].y)))
+        confs.append(face.detection_confidence)
+        landmarks_dict = {}
+        for landmark in face.landmarks:
+            landmarks_dict[landmark.type_] = point(landmark.position.x, landmark.position.y)
+        # dict into list for now
+        landmarks = [point(landmark.position.x, landmark.position.y) for landmark in face.landmarks]
+        orientations.append(face.roll_angle)
+        headwear_likelihoods.append(likelihood_name[face.headwear_likelihood])
 
-    if response.error.message:
-        raise Exception(
-            "{}\nFor more info on error messages, check: "
-            "https://cloud.google.com/apis/design/errors".format(response.error.message)
-        )
+    conf_str = [f"confidence: {face.detection_confidence}" for face in faces]
+    head_str = ",".join([f"{likelihood_name[face.headwear_likelihood]}" for face in faces])
+    return result(name='Google', bb=bounding_boxes, imgtxt=conf_str, lms=landmarks, ori=orientations, scores=confs, outstr={"headwear_likelihood:" : head_str})
+    
 
 if __name__ == '__main__':
-    test_path = '/Users/macbook/Code/MVP/JosephPlatform/test_img/0.jpg'
+    test_path = '/Users/macbook/Code/MVP/JosephPlatform/test_img/1.jpg'
     with open(test_path, "rb") as image_file:
         encode = base64.b64encode(image_file.read()).decode('utf-8')
     st = time.time()

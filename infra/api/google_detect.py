@@ -1,18 +1,40 @@
+import os
+import json
 import time
 import base64
 from google.cloud import vision
+from google.oauth2 import service_account
 import josephlogging.log as log
 from domain.interface import result, point, Error
 from domain.utils import trim_base64_header
 
 logger = log.getLogger(__name__)
+client = None
+
+def init():
+    global client
+    # Load credentials from environment variable
+    GOOGLE_CREDENTIALS_JSON = os.getenv('GOOGLE_CREDENTIALS_JSON')
+
+    if not GOOGLE_CREDENTIALS_JSON:
+        raise ValueError("GOOGLE_CREDENTIALS_JSON environment variable not set")
+
+    # Parse the JSON credentials
+    try:
+        credentials_info = json.loads(GOOGLE_CREDENTIALS_JSON)
+        credentials = service_account.Credentials.from_service_account_info(credentials_info)
+    except json.JSONDecodeError as e:
+        raise ValueError("Invalid JSON in GOOGLE_CREDENTIALS_JSON") from e
+
+    # Initialize the Vision API client with the credentials
+    client = vision.ImageAnnotatorClient(credentials=credentials)
 
 def detect_faces(image: str):
+    if client is None:
+        init()
     """Detects faces in an image."""
-    client = vision.ImageAnnotatorClient()
     image, _ = trim_base64_header(logger, image)
     content = base64.b64decode(image)
-    print(image[:20])
     image = vision.Image(content=content)
 
     response = client.face_detection(image=image)
@@ -67,5 +89,5 @@ if __name__ == '__main__':
     st = time.time()
     TIMES = 1
     for i in range(TIMES):
-        print(detect_faces(test_path).json())
+        print(detect_faces(encode).json())
     print(f'average took: {(time.time() - st) / TIMES} ms')

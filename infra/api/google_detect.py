@@ -11,6 +11,9 @@ from domain.utils import trim_base64_header
 logger = log.getLogger(__name__)
 client = None
 
+# Define PPE Labels
+PPE_LABELS = {"mask", "gloves", "helmet", "goggles", "protective eyewear", "safety glasses"}
+
 def init():
     global client
     # Load credentials from environment variable
@@ -79,9 +82,58 @@ def detect_faces(image: str):
 
     conf_str = [f"confidence: {face.detection_confidence}" for face in faces]
     head_str = ",".join([f"{likelihood_name[face.headwear_likelihood]}" for face in faces])
-    return result(name='Google', bb=bounding_boxes, imgtxt=conf_str, lms=landmarks, ori=orientations, scores=confs, outstr={"headwear_likelihood:" : head_str})
+    return result(name='Google_Cloud_Vision', bb=bounding_boxes, imgtxt=conf_str, lms=landmarks, ori=orientations, scores=confs, outstr={"headwear_likelihood:" : head_str})
     
+def detect_ppe(imagestr: str):
+    """
+    Detects PPE items in an uploaded image using Google Vision API's Object Localization.
+    Returns bounding boxes for detected PPE items.
+    """
+    if client is None:
+        init()
+    
+    imagestr, _ = trim_base64_header(logger, imagestr)
+    content = base64.b64decode(imagestr)
+    image = vision.Image(content=content)
 
+    # Perform Object Localization
+    response = client.object_localization(image=image)
+    objects = response.localized_object_annotations
+
+    ppe_objects = []
+    bbs = []
+    scores = []
+    detection = []  # list of detected objects
+    outstr = ""
+
+    for obj in objects:
+        label = obj.name.lower()
+        if label in PPE_LABELS:
+            # Extract bounding polygon
+            bounding_poly = obj.bounding_poly
+
+            # Convert vertices to a list of dicts
+            vertices = [{"x": vertex.x, "y": vertex.y} for vertex in bounding_poly.normalized_vertices]
+            bbs.append((point(bounding_poly.normalized_vertices[0].x, bounding_poly.normalized_vertices[0].y), point(bounding_poly.normalized_vertices[2].x, bounding_poly.normalized_vertices[2].y)))
+            scores.append(obj.score)
+            detection.append(obj.name)
+
+            ppe_objects.append({
+                "name": obj.name,
+                "score": obj.score,
+                "bounding_poly": vertices
+            })
+            outstr += str(ppe_objects) + "\n"
+
+    if response.error.message:
+        logger.error(response.error.message)
+        return Error(what="google vision error", where="detect")
+    
+    if outstr == "":
+        outstr = "No PPE objects detected."
+
+    return result(name='Vertex_Vision_PPE', bb=bbs, imgtxt=detection, scores=scores, outstr=outstr)
+    
 if __name__ == '__main__':
     test_path = '/Users/macbook/Code/MVP/JosephPlatform/test_img/1.jpg'
     with open(test_path, "rb") as image_file:
@@ -89,5 +141,5 @@ if __name__ == '__main__':
     st = time.time()
     TIMES = 1
     for i in range(TIMES):
-        print(detect_faces(encode).json())
+        print(detect_ppe(encode).json())
     print(f'average took: {(time.time() - st) / TIMES} ms')

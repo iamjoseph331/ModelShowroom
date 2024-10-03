@@ -1,7 +1,9 @@
 import os
+import cv2
 import json
 import time
 import base64
+import numpy as np
 from google.cloud import vision
 from google.oauth2 import service_account
 import josephlogging.log as log
@@ -96,6 +98,11 @@ def detect_ppe(imagestr: str):
     content = base64.b64decode(imagestr)
     image = vision.Image(content=content)
 
+    # Decode the image to get its dimensions
+    nparr = np.frombuffer(content, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    image_height, image_width, _ = img.shape
+
     # Perform Object Localization
     response = client.object_localization(image=image)
     objects = response.localized_object_annotations
@@ -112,9 +119,9 @@ def detect_ppe(imagestr: str):
             # Extract bounding polygon
             bounding_poly = obj.bounding_poly
 
-            # Convert vertices to a list of dicts
-            vertices = [{"x": vertex.x, "y": vertex.y} for vertex in bounding_poly.normalized_vertices]
-            bbs.append((point(bounding_poly.normalized_vertices[0].x, bounding_poly.normalized_vertices[0].y), point(bounding_poly.normalized_vertices[2].x, bounding_poly.normalized_vertices[2].y)))
+            # Convert vertices to a list of dicts and multiply by image width and height
+            vertices = [{"x": vertex.x * image_width, "y": vertex.y * image_height} for vertex in bounding_poly.normalized_vertices]
+            bbs.append((point(int(bounding_poly.normalized_vertices[0].x * image_width), int(bounding_poly.normalized_vertices[0].y * image_height)), point(int(bounding_poly.normalized_vertices[2].x * image_width), int(bounding_poly.normalized_vertices[2].y * image_height))))
             scores.append(obj.score)
             detection.append(obj.name)
 

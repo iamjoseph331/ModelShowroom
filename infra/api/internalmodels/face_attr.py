@@ -68,11 +68,11 @@ def run_session(session, data):
 
 def predict(base64_image: str): 
     rgb_image = data_uri_to_cv2_img(logger, base64_image)
-    bbs = loosedetectxyxy(img=rgb_image, fx=1.3)
+    bbs = loosedetectxyxy(img=rgb_image, fx=1.5)
     res_bbs = []
     ms = []
     for bb in bbs:
-        img = rgb_image[bb[1]:bb[3],bb[0]:bb[2],:]
+        img = rgb_image
         res = get_attributes(img)
         ms.append(str(res))
         tup = (point(x=bb[0],y=bb[1]), point(x=bb[2],y=bb[3]))

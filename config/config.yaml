@@ -8,7 +8,7 @@ task:
     models: 
       - GoogleVertex_Vision_PPE: infra.api.google_detect.detect_ppe
       - Joseph: infra.api.internalmodels.face_attr.predict
-      - LUUP_helmt_detection: infra.api.internalmodels.luup_helmet.predict
+      - LUUP_helmet_detection: infra.api.internalmodels.luup_helmet.predict
   face_detection:
     class: core.detection.FaceDetectionHandler
     models: 

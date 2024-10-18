@@ -1,5 +1,6 @@
 from domain.interface import point
 from domain.utils import trim_base64_header
+from PIL import Image, ImageOps
 import numpy as np
 import base64
 import cv2 
@@ -12,6 +13,38 @@ def data_uri_to_cv2_img(logger, data:str):
     #TODO: use from buffer instead
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR) #TODO: switch to TURBOJPEG 
     return img
+
+def pad_to_square(image, mean_color = (123, 116, 103)):
+    """
+    Pads the given image to make it square using the specified mean color.
+    
+    Args:
+        image (PIL.Image.Image): The image to pad.
+        mean_color (tuple): The RGB mean color to use for padding.
+        
+    Returns:
+        PIL.Image.Image: The padded square image.
+    """
+    width, height = image.size
+    if width == height:
+        return image  # Already square
+    
+    # Determine the size of the new square
+    max_side = max(width, height)
+    
+    # Calculate padding
+    delta_w = max_side - width
+    delta_h = max_side - height
+    padding = (
+        delta_w // 2,
+        delta_h // 2,
+        delta_w - (delta_w // 2),
+        delta_h - (delta_h // 2)
+    )
+    
+    # Apply padding
+    padded_image = ImageOps.expand(image, padding, fill=mean_color)
+    return padded_image
 
 def draw_axis(img, yaw, pitch, roll, tdx=None, tdy=None, size = 100):
     '''
@@ -68,7 +101,7 @@ def get_axis_points(yaw, pitch, roll, tdx, tdy, size=100, point_cnt=5):
 
 def mean_image_subtraction(images, means=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
     '''
-    image normalization
+    image normalization *RGB*
     :param images: bs * w * h * channel 
     :param means:
     :return:

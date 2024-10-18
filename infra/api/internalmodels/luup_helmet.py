@@ -68,13 +68,13 @@ def predict(base64_image: str):
     ms = []
     confs = []
     for bb in bbs:
-        img = rgb_image[bb[1]:bb[3],bb[0]:bb[2],:]
-        res = get_attributes(pilimg)
-        for k,v in res.items():
-            ms.append(v[0])
-            confs.append(v[1])
         tup = (point(x=bb[0],y=bb[1]), point(x=bb[2],y=bb[3]))
         res_bbs.append(tup)
+    res = get_attributes(pilimg)
+    for k,v in res.items():
+        ms.append(v[0])
+        confs.append(v[1])
+    
     output = {'detected faces': len(bbs), 'attributes':ms, 'confidence':confs}
     if DEBUG: cv2.imwrite('letout.jpg', img)   
     return result(name='attributes', bb=res_bbs ,imgtxt=ms, outstr=output)

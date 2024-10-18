@@ -84,7 +84,7 @@ def detect_faces(image: str):
 
     conf_str = [f"confidence: {face.detection_confidence}" for face in faces]
     head_str = ",".join([f"{likelihood_name[face.headwear_likelihood]}" for face in faces])
-    return result(name='Google_Cloud_Vision', bb=bounding_boxes, imgtxt=conf_str, lms=landmarks, ori=orientations, scores=confs, outstr={"headwear_likelihood:" : head_str})
+    return result(name='Google_Cloud_Vision', bb=bounding_boxes, imgtxt=headwear_likelihoods, lms=landmarks, ori=orientations, scores=confs, outstr={"headwear_likelihood:" : head_str})
     
 def detect_ppe(imagestr: str):
     """

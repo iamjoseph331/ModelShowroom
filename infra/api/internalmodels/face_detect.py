@@ -59,7 +59,7 @@ def inference(img_raw, vis_thres=0.6):
     img_size = 256
     nms_thresh = 0.6
 
-    f = os.path.join('infra', 'model', 'face_detect.onnx')
+    f = os.path.join('/Users/macbook/Code/MVP/JosephPlatform/infra', 'model', 'face_detect.onnx')
     if ort_session is None:
         if not init(f):
             return Error(f'FD Model {f}', 'initialization failed')

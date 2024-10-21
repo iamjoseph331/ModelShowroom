@@ -97,7 +97,7 @@ def softmax(x, axis=None):
     return exp_x_shifted / np.sum(exp_x_shifted, axis=axis, keepdims=True)
 
 if __name__ == '__main__':
-    img = Image.open("/Users/macbook/Code/MVP/JosephPlatform/test_img/4.jpg")
+    img = Image.open("/Users/macbook/Code/MVP/JosephPlatform/test_img/6.jpg")
     try:
         bbs = loosedetectxyxy(img=img, fx=1.5)
         bb = bbs[0]

@@ -62,6 +62,7 @@ def run_session(session, data):
 
 def predict(base64_image: str): 
     rgb_image = data_uri_to_cv2_img(logger, base64_image)
+    rgb_image = rgb_image[:, :, ::-1]
     pilimg = Image.fromarray(rgb_image)
     bbs = loosedetectxyxy(img=rgb_image, fx=1.5)
     res_bbs = []
@@ -76,7 +77,7 @@ def predict(base64_image: str):
         confs.append(v[1])
     
     output = {'detected faces': len(bbs), 'attributes':ms, 'confidence':confs}
-    if DEBUG: cv2.imwrite('letout.jpg', img)   
+    if DEBUG: pilimg.save("test.jpg")   
     return result(name='attributes', bb=res_bbs ,imgtxt=ms, outstr=output)
 
 def sigmoid(x):

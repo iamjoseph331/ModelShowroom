@@ -153,11 +153,11 @@ def upload_frame(timestamp:int, img:str, task:str, model:str, metadata:str, scor
         ext = 'jpg'
     name = name + f'.{ext}' 
     fullname = fullname + f'.{ext}'
-    path = os.path.join(os.getcwd(), 'infra/common/datalogs', name)
+    path = os.path.join(os.getcwd(), 'infra', 'common', 'datalogs', name)
     try:
         with open(path, 'wb+') as fh:
             fh.write(base64.decodebytes(bytes(img2, 'utf-8')))
-        #logger.info(f"Image saved locally at: {path}")
+        logger.info(f"Image saved locally at: {path}")
         # Initiate asynchronous upload
         future = upload_async(localpath=path, filename=fullname, metadata=metadata)
         #logger.info(f"Started asynchronous upload for file: {fullname}")

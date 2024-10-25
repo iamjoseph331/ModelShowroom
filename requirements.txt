@@ -4,7 +4,11 @@ uvicorn==0.30.6
 urllib3==1.26.6
 PyYAML==6.0.2
 google-cloud-vision==3.7.4
+google-api-core==2.20.0
+google-api-python-client==2.149.0
 google-auth==2.35.0
+google-auth-httplib2==0.2.0
+googleapis-common-protos==1.65.0
 onnxruntime==1.19.2
 opencv-python-headless==4.10.0.84
 pillow==11.0.0

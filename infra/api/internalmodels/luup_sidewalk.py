@@ -77,11 +77,7 @@ def predict(base64_image: str):
         confs.append(v[1])
     
     output = {'detected faces': len(bbs), 'attributes':ms, 'confidence':confs}
-    if DEBUG: 
-        try:
-            pilimg.save("test.jpg")   
-        except Exception as e:
-            print(e)    
+    if DEBUG: pilimg.save("test.jpg")   
     return result(name='attributes', bb=res_bbs ,imgtxt=ms, outstr=output)
 
 def sigmoid(x):

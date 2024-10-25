@@ -154,6 +154,7 @@ def upload_frame(timestamp:int, img:str, task:str, model:str, metadata:str, scor
     name = name + f'.{ext}' 
     fullname = fullname + f'.{ext}'
     path = os.path.join(os.getcwd(), 'infra', 'common', 'datalogs', name)
+    print(path, img2)
     try:
         with open(path, 'wb+') as fh:
             fh.write(base64.decodebytes(bytes(img2, 'utf-8')))

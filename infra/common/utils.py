@@ -46,6 +46,31 @@ def pad_to_square(image, mean_color = (123, 116, 103)):
     padded_image = ImageOps.expand(image, padding, fill=mean_color)
     return padded_image
 
+def crop_to_square(image):
+    """
+    Crops the given image to make it square by taking the center square.
+    
+    Args:
+        image (numpy.ndarray): The image to crop.
+        
+    Returns:
+        numpy.ndarray: The cropped square image.
+    """
+    height, width = image.shape[:2]
+    if width == height:
+        return image  # Already square
+    
+    # Determine the size of the new square
+    min_side = min(width, height)
+    
+    # Calculate cropping coordinates
+    start_x = (width - min_side) // 2
+    start_y = (height - min_side) // 2
+    
+    # Crop the image
+    cropped_image = image[start_y:start_y + min_side, start_x:start_x + min_side]
+    return cropped_image
+
 def draw_axis(img, yaw, pitch, roll, tdx=None, tdy=None, size = 100):
     '''
         debug use

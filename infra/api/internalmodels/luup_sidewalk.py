@@ -7,20 +7,20 @@ from PIL import Image, ImageOps
 from infra.common.fd_utils import letterbox
 from domain.interface import result, Error, point
 from infra.api.internalmodels.face_detect import loosedetectxyxy
-from infra.common.utils import data_uri_to_cv2_img, mean_image_subtraction, pad_to_square
+from infra.common.utils import data_uri_to_cv2_img, mean_image_subtraction, crop_to_square
 import josephlogging.log as log
 
 DEBUG = False
 
 logger = log.getLogger(__name__)
-providers =  ['CPUExecutionProvider', 'CUDAExecutionProvider']
+providers =  ['CPUExecutionProvider']
 ort_session = {}
 emotion_session = None
 attribute_task = {
-    'helmet': 'luuphelmet1021x1.onnx'
+    'sidewalk': 'luupsidewalk1025x1.onnx'
 }
 
-hat_class = {0: 'No Helmet', 1: 'Helmet'}
+hat_class = {0: '歩道', 1: '車道'}
 
 def init(task:str, modelname:str):
     try:
@@ -39,7 +39,7 @@ def get_attributes(img):
             if not init(k, file_path):
                 return Error(f'FA Model {file_path}', 'initialization failed')
     # preprocess
-    img = pad_to_square(img)
+    img = Image.fromarray(crop_to_square(np.array(img)))
     img256 = img.resize((256, 256)).convert('RGB')
     n_img = mean_image_subtraction(np.array(img256).astype(np.float32) / 255.0)
     n_img = n_img.transpose(2, 0, 1).copy() #(256,256,3)BGR to (3,256,256)BGR
@@ -84,13 +84,13 @@ def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
 def postprocess(task:str, score: float):
-    if task == 'helmet':
+    if task == 'sidewalk':
         res = softmax(score)
         res_class = np.argmax(res)
         ret_hat = hat_class[res_class]
         return ret_hat, round(float(res[res_class]), 4)
     else:
-        return Error(what='unsupported attribute', where='face_attr.py')
+        return Error(what='unsupported attribute', where='detect_attr.py')
 
 def softmax(x, axis=None):
     x_max = np.amax(x, axis=axis, keepdims=True)
@@ -98,7 +98,7 @@ def softmax(x, axis=None):
     return exp_x_shifted / np.sum(exp_x_shifted, axis=axis, keepdims=True)
 
 if __name__ == '__main__':
-    img = Image.open("/Users/macbook/Code/MVP/JosephPlatform/test_img/5.jpg")
+    img = Image.open("/Users/macbook/Code/MVP/JosephPlatform/test_img/2.jpg")
     try:
         bbs = loosedetectxyxy(img=img, fx=1.5)
         bb = bbs[0]

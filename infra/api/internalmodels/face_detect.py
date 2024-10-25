@@ -54,7 +54,6 @@ def loosedetectxyxy(img, fx):
     return new_det
 
 def inference(img_raw, vis_thres=0.6):
-    print('inference started')
     outlog = {}
     img_size = 256
     nms_thresh = 0.6

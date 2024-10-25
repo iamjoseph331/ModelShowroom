@@ -1,5 +1,6 @@
 import os
 import math
+import time
 import numpy as np
 import concurrent.futures
 import onnxruntime as ort
@@ -8,9 +9,11 @@ from infra.common.fd_utils import letterbox
 from domain.interface import result, Error, point
 from infra.api.internalmodels.face_detect import loosedetectxyxy
 from infra.common.utils import data_uri_to_cv2_img, mean_image_subtraction, crop_to_square
+from infra.common.datacollection import upload_frame
 import josephlogging.log as log
 
 DEBUG = False
+DATACOLLECTION = True
 
 logger = log.getLogger(__name__)
 providers =  ['CPUExecutionProvider']
@@ -78,6 +81,12 @@ def predict(base64_image: str):
     
     output = {'detected faces': len(bbs), 'attributes':ms, 'confidence':confs}
     if DEBUG: pilimg.save("test.jpg")   
+    if DATACOLLECTION:  
+        try:
+            timestamp = str(int(time.time()))
+            upload_frame(timestamp, base64_image, 'sidewalk', 'luupsidewalk1025x1', {}, float(confs[0]), '0', 'jpg')
+        except Exception as e:
+            logger.error(f'Data collection error: {e}')
     return result(name='attributes', bb=res_bbs ,imgtxt=ms, outstr=output)
 
 def sigmoid(x):

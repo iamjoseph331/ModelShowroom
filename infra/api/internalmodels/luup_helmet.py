@@ -9,7 +9,7 @@ from infra.common.fd_utils import letterbox
 from domain.interface import result, Error, point
 from infra.api.internalmodels.face_detect import loosedetectxyxy
 from infra.common.utils import data_uri_to_cv2_img, mean_image_subtraction, pad_to_square
-from infra.common.datacollection import upload_frame, get_data_name
+from infra.common.datacollection import upload_frame
 import josephlogging.log as log
 
 DEBUG = False

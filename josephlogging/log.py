@@ -28,8 +28,10 @@ if logging_level != 'Default':
     res['root']['level'] =logging_level
 logging.getLogger('matplotlib').disabled = True
 logging.getLogger('botocore').setLevel(logging.CRITICAL)
+logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
 logging.config.dictConfig(res)
 logging.setLoggerClass(CustomLogger)  # use the subclassed logger
+
 
 def getLogger(name):
     return logging.getLogger(name)  # just use this as a wrapper for logging module

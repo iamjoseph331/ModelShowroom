@@ -44,7 +44,7 @@ def create_folder(service, folder_name, parent_folder_id=None):
     lst = list_folder(service, parent_folder_id)
     for k, v in lst.items():
         if v == folder_name:
-            logger.info(f'Folder "{folder_name}" already exists with ID: {k}')
+            # logger.info(f'Folder "{folder_name}" already exists with ID: {k}')
             return k
 
     """Create a folder in Google Drive and return its ID."""
@@ -58,7 +58,7 @@ def create_folder(service, folder_name, parent_folder_id=None):
         fields='id'
     ).execute()
 
-    logger.info(f'Created Folder "{folder_name}" with ID: {created_folder["id"]}')
+    # logger.info(f'Created Folder "{folder_name}" with ID: {created_folder["id"]}')
     return created_folder["id"]
 
 def list_folder(service, parent_folder_id=None):
@@ -114,7 +114,6 @@ def upload(localpath: str, filename: str, metadata: str):
             'parents': [folder_id],
             'description': metadata
         }
-        logger.info(f"Uploading file: {localpath} as {filename} in folder ID {folder_id}")
         
         # Create media
         media = MediaFileUpload(localpath, resumable=True)
@@ -136,7 +135,7 @@ def upload(localpath: str, filename: str, metadata: str):
         if os.path.exists(localpath):
             try:
                 os.remove(localpath)
-                logger.info(f"Removed local file: {localpath}")
+                # logger.info(f"Removed local file: {localpath}")
             except Exception as e:
                 logger.warning(f"Could not remove local file '{localpath}': {e}")
 
@@ -158,17 +157,17 @@ def upload_frame(timestamp:int, img:str, task:str, model:str, metadata:str, scor
     try:
         with open(path, 'wb+') as fh:
             fh.write(base64.decodebytes(bytes(img2, 'utf-8')))
-        logger.info(f"Image saved locally at: {path}")
+        #logger.info(f"Image saved locally at: {path}")
         # Initiate asynchronous upload
         future = upload_async(localpath=path, filename=fullname, metadata=metadata)
-        logger.info(f"Started asynchronous upload for file: {fullname}")
+        #logger.info(f"Started asynchronous upload for file: {fullname}")
         return future
     except Exception as e:
         logger.error(f"Error in upload_frame: {e}")
         if os.path.exists(path):
             try:
                 os.remove(path)
-                logger.info(f"Removed local file due to error: {path}")
+                logger.warning(f"Removed local file due to error: {path}")
             except Exception as ex:
                 logger.warning(f"Could not remove local file '{path}': {ex}")
         raise

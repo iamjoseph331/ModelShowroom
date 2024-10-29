@@ -84,7 +84,7 @@ def predict(base64_image: str):
     if DATACOLLECTION:  
         try:
             timestamp = str(int(time.time()))
-            upload_frame(timestamp, base64_image, 'sidewalk', 'luupsidewalk1025x1', {}, float(confs[0]), '0', 'jpg')
+            upload_frame(timestamp, base64_image, 'sidewalk', 'luupsidewalk1029x2', {}, float(confs[0]), '0', 'jpg')
         except Exception as e:
             logger.error(f'Data collection error: {e}')
     return result(name='attributes', bb=res_bbs ,imgtxt=ms, outstr=output)

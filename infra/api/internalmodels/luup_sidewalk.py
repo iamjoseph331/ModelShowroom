@@ -8,7 +8,7 @@ from PIL import Image, ImageOps
 from infra.common.fd_utils import letterbox
 from domain.interface import result, Error, point
 from infra.api.internalmodels.face_detect import loosedetectxyxy
-from infra.common.utils import data_uri_to_cv2_img, mean_image_subtraction, crop_to_square
+from infra.common.utils import data_uri_to_cv2_img, mean_image_subtraction, pad_to_square
 from infra.common.datacollection import upload_frame
 import josephlogging.log as log
 
@@ -20,7 +20,7 @@ providers =  ['CPUExecutionProvider']
 ort_session = {}
 emotion_session = None
 attribute_task = {
-    'sidewalk': 'luupsidewalk1025x1.onnx'
+    'sidewalk': 'luupsidewalk1114xL3e.onnx'
 }
 
 hat_class = {0: '歩道', 1: '車道'}
@@ -42,7 +42,7 @@ def get_attributes(img):
             if not init(k, file_path):
                 return Error(f'FA Model {file_path}', 'initialization failed')
     # preprocess
-    img = Image.fromarray(crop_to_square(np.array(img)))
+    img = pad_to_square(img)
     img256 = img.resize((256, 256)).convert('RGB')
     n_img = mean_image_subtraction(np.array(img256).astype(np.float32) / 255.0)
     n_img = n_img.transpose(2, 0, 1).copy() #(256,256,3)BGR to (3,256,256)BGR
@@ -84,7 +84,7 @@ def predict(base64_image: str):
     if DATACOLLECTION:  
         try:
             timestamp = str(int(time.time()))
-            upload_frame(timestamp, base64_image, 'sidewalk', 'luupsidewalk1029x2', {}, float(confs[0]), '0', 'jpg')
+            upload_frame(timestamp, base64_image, 'sidewalk', attribute_task['sidewalk'], {}, float(confs[0]), '0', 'jpg')
         except Exception as e:
             logger.error(f'Data collection error: {e}')
     return result(name='attributes', bb=res_bbs ,imgtxt=ms, outstr=output)
@@ -99,7 +99,7 @@ def postprocess(task:str, score: float):
         ret_hat = hat_class[res_class]
         return ret_hat, round(float(res[res_class]), 4)
     else:
-        return Error(what='unsupported attribute', where='detect_attr.py')
+        return Error(what='unsupported attribute', where='luup_sidewalk.py')
 
 def softmax(x, axis=None):
     x_max = np.amax(x, axis=axis, keepdims=True)

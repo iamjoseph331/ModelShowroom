@@ -2,11 +2,11 @@ from domain.interface import Image, Error
 from config.config import cfg
 from josephlogging import log
 
-class FaceAttrbutesHandler:
+class AttrbutesHandler:
     model_list = {}
     def __init__(self):
         self.logger = log.getLogger(__name__)
-        models = cfg['task']['face_attributes']['models']
+        models = cfg['task']['attributes']['models']
         for model in models:
             for key in model:
                 model_name = key

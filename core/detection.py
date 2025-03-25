@@ -2,11 +2,11 @@ from domain.interface import Image, Error
 from config.config import cfg
 from josephlogging import log
 
-class FaceDetectionHandler:
+class DetectionHandler:
     model_list = {}
     def __init__(self):
         self.logger = log.getLogger(__name__)
-        models = cfg['task']['face_detection']['models']
+        models = cfg['task']['detection']['models']
         for model in models:
             for key in model:
                 model_name = key
@@ -24,13 +24,13 @@ class FaceDetectionHandler:
     def details(self):
         self.logger.info(f'FD models: {[m for m in self.model_list]}')
 
-    def predict(self, image: Image):
+    def predict(self, image: Image, threshold:float=0.5):
         model_name = image.mdl_name
         if model_name not in self.model_list:
             return Error(where='mdl_name', what='not found').json()
-        res = self.model_list[model_name](image.image)
+        res = self.model_list[model_name](image.image, threshold)
         return res
 
 if __name__ == "__main__":
-    hand = FaceDetectionHandler()
+    hand = DetectionHandler()
     hand.details()

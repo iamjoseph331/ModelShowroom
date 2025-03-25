@@ -7,6 +7,7 @@ class Image(BaseModel):
     cv_task: str
     image: str
     metadata: str = ''
+    threshold: float = 0.5
 
 class point:
     def __init__(self, x=0, y=0) -> None:

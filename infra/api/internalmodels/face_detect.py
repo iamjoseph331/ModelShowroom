@@ -173,7 +173,7 @@ def inference(img_raw, vis_thres=0.6):
     return res
 
 if __name__ == '__main__':
-    with open("test_img/0.jpg", "rb") as image_file:
+    with open("test_img/3.jpg", "rb") as image_file:
         encode = base64.b64encode(image_file.read()).decode('utf-8')
     st = time.time()
     bb = predict(encode).bounding_box[0]

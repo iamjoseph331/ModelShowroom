@@ -1,20 +1,20 @@
 from fastapi import Depends
 from config.config import cfg
 from domain.interface import Image, Error
-from core.attributes import FaceAttrbutesHandler
-from core.detection import FaceDetectionHandler
+from core.attributes import AttrbutesHandler
+from core.detection import DetectionHandler
 
 class ModelView:
     tasks = {}
-    def __init__(self, fd=Depends(FaceDetectionHandler), fa=Depends(FaceAttrbutesHandler)):    
-        self.tasks['face_attributes'] = fa
-        self.tasks['face_detection'] = fd
+    def __init__(self, fd=Depends(DetectionHandler), fa=Depends(AttrbutesHandler)):    
+        self.tasks['attributes'] = fa
+        self.tasks['detection'] = fd
 
-    def predict(self, image: Image):
+    def predict(self, image: Image, threshold:float=0.5):
         if image.cv_task not in self.tasks:
             return Error(where='cv_task', what='not found').json()
         handler = self.tasks[image.cv_task]
-        return handler.predict(image)
+        return handler.predict(image, threshold)
 
     def get_models(self):
         task_dict = {}

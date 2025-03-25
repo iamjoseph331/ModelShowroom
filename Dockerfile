@@ -12,8 +12,8 @@ COPY requirements.txt .
 ENV SERVICE_NAME="josephplatform"
 RUN python -m pip install --no-cache-dir --upgrade pip==22.3.1
 RUN pip install --no-cache-dir -r requirements.txt --use-pep517
-RUN pip uninstall --yes opencv-python-headless opencv-python
-RUN pip install --no-cache-dir opencv-python-headless==4.6.0.66
+RUN pip uninstall --yes opencv-python-headless opencv-python numpy
+RUN pip install --no-cache-dir opencv-python-headless==4.6.0.66 numpy==1.23
 
 FROM python:3.9-slim AS build-image
 COPY --from=compile-image /opt/venv /opt/venv

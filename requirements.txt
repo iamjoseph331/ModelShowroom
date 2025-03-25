@@ -12,3 +12,4 @@ googleapis-common-protos==1.65.0
 onnxruntime==1.19.2
 opencv-python-headless==4.10.0.84
 pillow==11.0.0
+ultralytics>=8.3.0

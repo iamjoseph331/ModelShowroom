@@ -3,18 +3,19 @@ port: 6370
 
 # List of tasks
 task:
-  face_attributes:
-    class: core.attributes.FaceAttrbutesHandler
+  attributes:
+    class: core.attributes.AttrbutesHandler
     models: 
       - GoogleVertex_Vision_PPE: infra.api.google_detect.detect_ppe
       - Joseph: infra.api.internalmodels.face_attr.predict
       - LUUP_helmet_detection: infra.api.internalmodels.luup_helmet.predict
       - LUUP_sidewalk_detection: infra.api.internalmodels.luup_sidewalk.predict
-  face_detection:
-    class: core.detection.FaceDetectionHandler
+  detection:
+    class: core.detection.DetectionHandler
     models: 
        - GoogleCloudVision: infra.api.google_detect.detect_faces
        - Joseph: infra.api.internalmodels.face_detect.predict
+       - LuupVehicles: infra.api.internalmodels.luup_vehicles.predict
        
 logging:
   version: 1

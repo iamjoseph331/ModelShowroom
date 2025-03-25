@@ -1,7 +1,7 @@
 import uvicorn
 
-from core.attributes import FaceAttrbutesHandler
-from core.detection import FaceDetectionHandler
+from core.attributes import AttrbutesHandler
+from core.detection import DetectionHandler
 
 from view.view import ModelView
 from config.config import cfg, public_host
@@ -17,8 +17,8 @@ app = FastAPI()
 logger = log.getLogger(__name__)
 
 def init():
-    fa_handle = FaceAttrbutesHandler()
-    fd_handle = FaceDetectionHandler()
+    fa_handle = AttrbutesHandler()
+    fd_handle = DetectionHandler()
     return ModelView(fd=fd_handle, fa=fa_handle)
      
 origins = [
@@ -44,7 +44,7 @@ async def init_model(model_name):
 @app.post('/api/predict')
 async def predict(image: Image):
     logger.info(f'predict to {image.mdl_name}')
-    return view.predict(image)
+    return view.predict(image, threshold=image.threshold)
     
 @app.get('/api/getmodels')
 async def get_models():
